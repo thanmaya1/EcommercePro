@@ -15,6 +15,7 @@ import ProductDetail from "@/pages/product-detail";
 import ShoppingCartPage from "@/pages/shopping-cart";
 import UserProfile from "@/pages/user-profile";
 import WishlistPage from "@/pages/wishlist";
+import CheckoutPage from "@/pages/checkout";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -25,6 +26,7 @@ function Router() {
       <ProtectedRoute path="/storefront" component={Storefront} />
       <ProtectedRoute path="/product/:id" component={ProductDetail} />
       <ProtectedRoute path="/cart" component={ShoppingCartPage} />
+      <ProtectedRoute path="/checkout" component={CheckoutPage} />
       <ProtectedRoute path="/wishlist" component={WishlistPage} />
       <ProtectedRoute path="/profile" component={UserProfile} />
       <Route path="/auth" component={AuthPage} />

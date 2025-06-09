@@ -82,10 +82,14 @@ export default function WishlistPage() {
   }
 
   // Get wishlist items with product details
-  const wishlistItemsWithProducts = (wishlistItems as any[]).map((item: any) => {
-    const product = (products as any[]).find((p: any) => p.id === item.productId);
-    return { ...item, product };
-  }).filter((item: any) => item.product);
+  const wishlistItemsWithProducts = Array.isArray(wishlistItems) 
+    ? wishlistItems.map((item: any) => {
+        const product = Array.isArray(products) 
+          ? products.find((p: any) => p.id === item.productId)
+          : null;
+        return { ...item, product };
+      }).filter((item: any) => item.product)
+    : [];
 
   const renderStars = (rating: number = 5) => {
     return Array.from({ length: 5 }, (_, i) => (
