@@ -145,6 +145,11 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
 export const insertOrderSchema = createInsertSchema(orders).omit({
   id: true,
   createdAt: true,
+}).extend({
+  subtotal: z.string().regex(/^\d+(\.\d{1,2})?$/),
+  discount: z.string().regex(/^\d+(\.\d{1,2})?$/),
+  tax: z.string().regex(/^\d+(\.\d{1,2})?$/),
+  total: z.string().regex(/^\d+(\.\d{1,2})?$/),
 });
 
 export const insertCartItemSchema = createInsertSchema(cartItems).omit({
@@ -160,6 +165,10 @@ export const insertWishlistItemSchema = createInsertSchema(wishlistItems).omit({
 export const insertCouponSchema = createInsertSchema(coupons).omit({
   id: true,
   createdAt: true,
+}).extend({
+  discountValue: z.string().regex(/^\d+(\.\d{1,2})?$/),
+  minOrderAmount: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
+  maxDiscountAmount: z.string().regex(/^\d+(\.\d{1,2})?$/).optional(),
 });
 
 export const insertAddressSchema = createInsertSchema(addresses).omit({
