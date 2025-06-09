@@ -274,6 +274,7 @@ export class MemStorage implements IStorage {
     const user: User = {
       ...insertUser,
       id,
+      isAdmin: insertUser.isAdmin ?? false,
       createdAt: new Date(),
     };
     this.users.set(id, user);
@@ -302,6 +303,7 @@ export class MemStorage implements IStorage {
     const category: Category = {
       ...insertCategory,
       id,
+      description: insertCategory.description || null,
       createdAt: new Date(),
     };
     this.categories.set(id, category);
@@ -352,6 +354,11 @@ export class MemStorage implements IStorage {
     const product: Product = {
       ...insertProduct,
       id,
+      salePrice: insertProduct.salePrice || null,
+      categoryId: insertProduct.categoryId || null,
+      stock: insertProduct.stock ?? 0,
+      imageUrl: insertProduct.imageUrl || null,
+      isActive: insertProduct.isActive ?? true,
       createdAt: new Date(),
     };
     this.products.set(id, product);
@@ -412,6 +419,9 @@ export class MemStorage implements IStorage {
     const order: Order = {
       ...insertOrder,
       id,
+      status: insertOrder.status || "pending",
+      discount: insertOrder.discount || "0.00",
+      couponCode: insertOrder.couponCode || null,
       createdAt: new Date(),
     };
     this.orders.set(id, order);
@@ -526,6 +536,10 @@ export class MemStorage implements IStorage {
     const coupon: Coupon = {
       ...insertCoupon,
       id,
+      isActive: insertCoupon.isActive ?? true,
+      minOrderAmount: insertCoupon.minOrderAmount || null,
+      maxDiscountAmount: insertCoupon.maxDiscountAmount || null,
+      expiresAt: insertCoupon.expiresAt || null,
       createdAt: new Date(),
     };
     this.coupons.set(id, coupon);
@@ -558,6 +572,7 @@ export class MemStorage implements IStorage {
     const address: Address = {
       ...insertAddress,
       id,
+      isDefault: insertAddress.isDefault ?? false,
       createdAt: new Date(),
     };
     this.addresses.set(id, address);
