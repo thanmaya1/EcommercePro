@@ -103,10 +103,14 @@ export default function ShoppingCartPage() {
   }
 
   // Get product details for cart items
-  const cartItemsWithProducts = cartItems.map((item: any) => {
-    const product = products.find((p: any) => p.id === item.productId);
-    return { ...item, product };
-  }).filter((item: any) => item.product);
+  const cartItemsWithProducts = Array.isArray(cartItems) 
+    ? cartItems.map((item: any) => {
+        const product = Array.isArray(products) 
+          ? products.find((p: any) => p.id === item.productId)
+          : null;
+        return { ...item, product };
+      }).filter((item: any) => item.product)
+    : [];
 
   // Calculate totals
   const subtotal = cartItemsWithProducts.reduce((sum: number, item: any) => {
@@ -323,10 +327,12 @@ export default function ShoppingCartPage() {
                 </div>
               </div>
 
-              <Button className="w-full" size="lg">
-                <CreditCard className="h-4 w-4 mr-2" />
-                Proceed to Checkout
-              </Button>
+              <Link href="/checkout">
+                <Button className="w-full" size="lg">
+                  <CreditCard className="h-4 w-4 mr-2" />
+                  Proceed to Checkout
+                </Button>
+              </Link>
 
               <div className="text-center pt-4">
                 <p className="text-sm text-neutral mb-3">Secure checkout with</p>

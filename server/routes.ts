@@ -451,6 +451,34 @@ export function registerRoutes(app: Express): Server {
     }
   });
 
+  // Order item routes
+  app.post("/api/order-items", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const orderItem = await storage.createOrderItem(req.body);
+      res.status(201).json(orderItem);
+    } catch (error) {
+      res.status(400).json({ message: "Failed to create order item" });
+    }
+  });
+
+  // Clear cart route
+  app.delete("/api/cart/clear", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      await storage.clearCart(req.user!.id);
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ message: "Failed to clear cart" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

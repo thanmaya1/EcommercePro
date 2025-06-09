@@ -98,7 +98,7 @@ export interface IStorage {
   updateAddress(id: number, updates: Partial<Address>): Promise<Address | undefined>;
   deleteAddress(id: number, userId: number): Promise<boolean>;
 
-  sessionStore: session.SessionStore;
+  sessionStore: any;
 }
 
 export class MemStorage implements IStorage {
@@ -122,7 +122,7 @@ export class MemStorage implements IStorage {
   private currentWishlistItemId: number;
   private currentCouponId: number;
   private currentAddressId: number;
-  sessionStore: session.SessionStore;
+  sessionStore: any;
 
   constructor() {
     this.users = new Map();
@@ -240,6 +240,20 @@ export class MemStorage implements IStorage {
     };
 
     this.coupons.set(save15Coupon.id, save15Coupon);
+
+    // Seed admin user
+    const adminUser: User = {
+      id: this.currentUserId++,
+      username: "admin",
+      email: "admin@shopmaster.com",
+      password: "$hashed$password", // This will be properly hashed when created through API
+      firstName: "Admin",
+      lastName: "User",
+      isAdmin: true,
+      createdAt: new Date(),
+    };
+
+    this.users.set(adminUser.id, adminUser);
   }
 
   // User methods

@@ -137,12 +137,12 @@ export default function CheckoutPage() {
 
   if (!user) {
     setLocation("/auth");
-    return null;
+    return <div>Redirecting...</div>;
   }
 
   if (cartItemsWithProducts.length === 0) {
     setLocation("/cart");
-    return null;
+    return <div>Redirecting...</div>;
   }
 
   const onSubmit = (data: CheckoutFormData) => {
