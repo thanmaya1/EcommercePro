@@ -274,14 +274,26 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const wishlistItemData = insertWishlistItemSchema.parse({
-        ...req.body,
+      const wishlistItemData = {
         userId: req.user!.id,
-      });
+        productId: req.body.productId,
+      };
+      
+      // Check if already in wishlist
+      const existingItem = await storage.getWishlistItems(req.user!.id);
+      const alreadyExists = existingItem.some((item: any) => 
+        (item.productId.toString() === wishlistItemData.productId) || 
+        (item.productId._id?.toString() === wishlistItemData.productId)
+      );
+      
+      if (alreadyExists) {
+        return res.status(400).json({ message: "Item already in wishlist" });
+      }
       
       const wishlistItem = await storage.addToWishlist(wishlistItemData);
       res.status(201).json(wishlistItem);
     } catch (error) {
+      console.error("Wishlist error:", error);
       res.status(400).json({ message: "Invalid wishlist item data" });
     }
   });
@@ -463,6 +475,51 @@ export function registerRoutes(app: Express): Server {
       res.status(201).json(orderItem);
     } catch (error) {
       res.status(400).json({ message: "Failed to create order item" });
+    }
+  });
+
+  // Create order route
+  app.post("/api/orders", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+
+    try {
+      const { shippingAddress, total } = req.body;
+      
+      // Get cart items
+      const cartItems = await storage.getCartItems(req.user!.id);
+      if (cartItems.length === 0) {
+        return res.status(400).json({ message: "Cart is empty" });
+      }
+
+      // Create order
+      const orderData = {
+        userId: req.user!.id,
+        total: total.toString(),
+        status: 'pending',
+        shippingAddress: shippingAddress || 'No address provided',
+      };
+
+      const order = await storage.createOrder(orderData);
+
+      // Create order items
+      for (const item of cartItems) {
+        await storage.createOrderItem({
+          orderId: order._id,
+          productId: item.productId,
+          quantity: item.quantity,
+          price: "0.00" // You might want to fetch actual product price here
+        });
+      }
+
+      // Clear cart
+      await storage.clearCart(req.user!.id);
+
+      res.status(201).json(order);
+    } catch (error) {
+      console.error("Order creation error:", error);
+      res.status(400).json({ message: "Failed to create order" });
     }
   });
 

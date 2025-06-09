@@ -93,7 +93,7 @@ export default function CheckoutPage() {
       const selectedAddress = Array.isArray(addresses) 
         ? addresses.find((addr: any) => (addr._id || addr.id).toString() === data.shippingAddressId)
         : null;
-      
+
       const orderData = {
         userId: user!.id,
         status: "pending",
@@ -130,7 +130,8 @@ export default function CheckoutPage() {
       setOrderPlaced(true);
       toast({ title: "Order placed successfully!" });
     },
-    onError: () => {
+    onError: (error: any) => {
+      console.error("Order error:", error);
       toast({ title: "Failed to place order", variant: "destructive" });
     },
   });
@@ -146,13 +147,17 @@ export default function CheckoutPage() {
   }
 
   const onSubmit = (data: CheckoutFormData) => {
-    if (step === 1) {
-      setStep(2);
-    } else if (step === 2) {
-      setStep(3);
-    } else {
-      createOrderMutation.mutate(data);
-    }
+    const selectedAddress = addresses.find((addr: any) => (addr.id || addr._id) === data.shippingAddressId);
+
+    const orderData = {
+      total: total.toFixed(2),
+      shippingAddress: selectedAddress ? 
+        `${selectedAddress.firstName} ${selectedAddress.lastName}, ${selectedAddress.address}, ${selectedAddress.city}, ${selectedAddress.state} ${selectedAddress.zipCode}` :
+        "No address selected",
+      paymentMethod: data.paymentMethod,
+    };
+
+    createOrderMutation.mutate(data);
   };
 
   if (orderPlaced) {

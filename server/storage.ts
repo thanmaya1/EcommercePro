@@ -89,7 +89,10 @@ const couponSchema = new mongoose.Schema({
 
 const addressSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  street: { type: String, required: true },
+  type: { type: String, required: true }, // 'shipping' or 'billing'
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  address: { type: String, required: true },
   city: { type: String, required: true },
   state: { type: String, required: true },
   zipCode: { type: String, required: true },

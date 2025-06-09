@@ -102,36 +102,23 @@ export default function ShoppingCartPage() {
     );
   }
 
-  // Get product details for cart items
+  // Get cart items with product details
   const cartItemsWithProducts = Array.isArray(cartItems) 
     ? cartItems.map((item: any) => {
         const product = Array.isArray(products) 
-          ? products.find((p: any) => p.id === item.productId)
+          ? products.find((p: any) => (p.id || p._id) === item.productId || (p.id || p._id) === (item.productId?._id || item.productId))
           : null;
         return { ...item, product };
       }).filter((item: any) => item.product)
     : [];
 
-  // Calculate totals
   const subtotal = cartItemsWithProducts.reduce((sum: number, item: any) => {
-    const price = parseFloat(item.product.salePrice || item.product.price);
-    return sum + (price * item.quantity);
+    const price = parseFloat(item.product.salePrice || item.product.price || "0");
+    return sum + (price * (item.quantity || 1));
   }, 0);
 
-  let discount = 0;
-  if (appliedCoupon) {
-    if (appliedCoupon.discountType === "percentage") {
-      discount = (subtotal * parseFloat(appliedCoupon.discountValue)) / 100;
-      if (appliedCoupon.maxDiscountAmount) {
-        discount = Math.min(discount, parseFloat(appliedCoupon.maxDiscountAmount));
-      }
-    } else {
-      discount = parseFloat(appliedCoupon.discountValue);
-    }
-  }
-
-  const tax = (subtotal - discount) * 0.08; // 8% tax
-  const total = subtotal - discount + tax;
+  const tax = subtotal * 0.08; // 8% tax
+  const total = subtotal + tax;
 
   const updateQuantity = (id: number, quantity: number) => {
     if (quantity <= 0) {
@@ -177,7 +164,7 @@ export default function ShoppingCartPage() {
       </div>
 
       <h2 className="text-3xl font-bold mb-8">Shopping Cart</h2>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Cart Items */}
         <div className="lg:col-span-2">

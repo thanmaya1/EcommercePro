@@ -35,12 +35,19 @@ export default function ProductDetail() {
   const { user } = useAuth();
   const { toast } = useToast();
 
-  // Fetch product data
   const { data: product, isLoading } = useQuery({
-    queryKey: ["/api/products", id],
-    queryFn: () => fetch(`/api/products/${id}`, { credentials: "include" }).then(res => res.json()),
+    queryKey: [`/api/products/${id}`],
     enabled: !!id,
   });
+
+  // If product not found, try with the id directly
+  const { data: fallbackProduct } = useQuery({
+    queryKey: ["/api/products"],
+    select: (products: any[]) => products.find(p => (p._id || p.id) === id),
+    enabled: !product && !isLoading,
+  });
+
+  const currentProduct = product || fallbackProduct;
 
   const { data: reviews = [] } = useQuery({
     queryKey: ["/api/products", id, "reviews"],
@@ -104,15 +111,27 @@ export default function ProductDetail() {
     },
   });
 
-  if (isLoading) {
-    return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
+  if (!currentProduct && !isLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Product not found</h1>
+        </div>
+      </div>
+    );
   }
 
-  if (!product) {
-    return <div className="flex items-center justify-center min-h-screen">Product not found</div>;
+  if (!currentProduct) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Loading...</h1>
+        </div>
+      </div>
+    );
   }
 
-  const category = categories.find((cat: any) => (cat._id || cat.id).toString() === product.categoryId.toString());
+  const category = categories.find((cat: any) => (cat._id || cat.id).toString() === currentProduct.categoryId.toString());
   const averageRating = reviews.length > 0 
     ? reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / reviews.length 
     : 0;
@@ -135,11 +154,13 @@ export default function ProductDetail() {
 
   // Mock images for demonstration
   const productImages = [
-    product.imageUrl || "https://via.placeholder.com/600x600",
+    currentProduct.imageUrl || "https://via.placeholder.com/600x600",
     "https://images.unsplash.com/photo-1583394838336-acd977736f90?ixlib=rb-4.0.3&w=150&h=150&fit=crop",
     "https://images.unsplash.com/photo-1484704849700-f032a568e944?ixlib=rb-4.0.3&w=150&h=150&fit=crop",
     "https://images.unsplash.com/photo-1546435770-a3e426bf472b?ixlib=rb-4.0.3&w=150&h=150&fit=crop",
   ];
+
+  const productId = currentProduct._id || currentProduct.id;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -152,7 +173,7 @@ export default function ProductDetail() {
           <ChevronRight className="h-4 w-4 text-neutral" />
           <li><span className="text-neutral">{category?.name}</span></li>
           <ChevronRight className="h-4 w-4 text-neutral" />
-          <li><span className="text-primary">{product.name}</span></li>
+          <li><span className="text-primary">{currentProduct.name}</span></li>
         </ol>
       </nav>
 
@@ -162,7 +183,7 @@ export default function ProductDetail() {
           <div className="mb-4">
             <img
               src={productImages[selectedImage]}
-              alt={product.name}
+              alt={currentProduct.name}
               className="w-full h-96 object-cover rounded-xl shadow-lg"
             />
           </div>
@@ -171,7 +192,7 @@ export default function ProductDetail() {
               <img
                 key={index}
                 src={image}
-                alt={`${product.name} - View ${index + 1}`}
+                alt={`${currentProduct.name} - View ${index + 1}`}
                 className={`w-full h-20 object-cover rounded-lg cursor-pointer border-2 transition-colors ${
                   selectedImage === index ? "border-primary" : "border-transparent hover:border-gray-300"
                 }`}
@@ -192,35 +213,35 @@ export default function ProductDetail() {
                 {averageRating.toFixed(1)} ({reviews.length} reviews)
               </span>
             </div>
-            <h1 className="text-3xl font-bold mb-2">{product.name}</h1>
-            <p className="text-neutral mb-4">SKU: {product.sku}</p>
+            <h1 className="text-3xl font-bold mb-2">{currentProduct.name}</h1>
+            <p className="text-neutral mb-4">SKU: {currentProduct.sku}</p>
           </div>
 
           <div className="mb-6">
             <div className="flex items-center space-x-4 mb-4">
               <span className="text-3xl font-bold">
-                ${product.salePrice || product.price}
+                ${currentProduct.salePrice || currentProduct.price}
               </span>
-              {product.salePrice && (
+              {currentProduct.salePrice && (
                 <>
                   <span className="text-xl text-neutral line-through">
-                    ${product.price}
+                    ${currentProduct.price}
                   </span>
                   <Badge className="bg-secondary text-white">
-                    {calculateDiscount(product.price, product.salePrice)}% OFF
+                    {calculateDiscount(currentProduct.price, currentProduct.salePrice)}% OFF
                   </Badge>
                 </>
               )}
             </div>
             <p className="text-success font-medium">
-              ✓ In Stock ({product.stock} available)
+              ✓ In Stock ({currentProduct.stock} available)
             </p>
           </div>
 
           <div className="mb-6">
             <h3 className="font-semibold mb-3">Description</h3>
             <p className="text-neutral leading-relaxed">
-              {product.description}
+              {currentProduct.description}
             </p>
           </div>
 
@@ -242,16 +263,16 @@ export default function ProductDetail() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                  disabled={quantity >= product.stock}
+                  onClick={() => setQuantity(Math.min(currentProduct.stock, quantity + 1))}
+                  disabled={quantity >= currentProduct.stock}
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
               <Button
                 className="flex-1"
-                onClick={() => user && addToCartMutation.mutate({ productId: (product._id || product.id).toString(), quantity })}
-                disabled={!user || addToCartMutation.isPending}
+                onClick={() => user && addToCartMutation.mutate({ productId: (currentProduct._id || currentProduct.id).toString(), quantity })}
+                disabled={!user || addToCartMutation.isPending || currentProduct.stock === 0}
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
                 Add to Cart
@@ -259,7 +280,7 @@ export default function ProductDetail() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => user && addToWishlistMutation.mutate((product._id || product.id).toString())}
+                onClick={() => user && addToWishlistMutation.mutate((currentProduct._id || currentProduct.id).toString())}
                 disabled={!user}
               >
                 <Heart className="h-4 w-4" />
@@ -290,7 +311,7 @@ export default function ProductDetail() {
       <div className="mt-16">
         <Separator className="mb-8" />
         <h2 className="text-2xl font-bold mb-6">Customer Reviews</h2>
-        
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Review Summary */}
           <div className="lg:col-span-1">
@@ -302,7 +323,7 @@ export default function ProductDetail() {
                 </div>
                 <p className="text-neutral">Based on {reviews.length} reviews</p>
               </div>
-              
+
               {user && (
                 <div className="mt-6">
                   <h3 className="font-semibold mb-3">Write a Review</h3>
