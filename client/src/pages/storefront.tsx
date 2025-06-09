@@ -142,20 +142,25 @@ export default function Storefront() {
                   />
                   <Label htmlFor="all-categories" className="text-sm">All Categories</Label>
                 </div>
-                {categories.map((category: any) => (
-                  <div key={category.id} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`category-${category.id}`}
-                      checked={selectedCategory === category.id.toString()}
-                      onCheckedChange={() => setSelectedCategory(
-                        selectedCategory === category.id.toString() ? "" : category.id.toString()
-                      )}
-                    />
-                    <Label htmlFor={`category-${category.id}`} className="text-sm">
-                      {category.name}
-                    </Label>
-                  </div>
-                ))}
+                {categories.filter((category: any) => category.id || category._id).map((category: any) => {
+                  const categoryId = category.id || category._id;
+                  const categoryIdStr = categoryId ? categoryId.toString() : "";
+                  
+                  return (
+                    <div key={categoryIdStr} className="flex items-center space-x-2">
+                      <Checkbox
+                        id={`category-${categoryIdStr}`}
+                        checked={selectedCategory === categoryIdStr}
+                        onCheckedChange={() => setSelectedCategory(
+                          selectedCategory === categoryIdStr ? "" : categoryIdStr
+                        )}
+                      />
+                      <Label htmlFor={`category-${categoryIdStr}`} className="text-sm">
+                        {category.name}
+                      </Label>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
