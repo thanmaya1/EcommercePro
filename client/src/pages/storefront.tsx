@@ -129,7 +129,7 @@ export default function Storefront() {
               <Filter className="h-4 w-4 mr-2" />
               Filters
             </h3>
-            
+
             {/* Category Filter */}
             <div className="mb-6">
               <h4 className="font-medium mb-3">Categories</h4>
@@ -145,7 +145,7 @@ export default function Storefront() {
                 {categories.filter((category: any) => category.id || category._id).map((category: any) => {
                   const categoryId = category.id || category._id;
                   const categoryIdStr = categoryId ? categoryId.toString() : "";
-                  
+
                   return (
                     <div key={categoryIdStr} className="flex items-center space-x-2">
                       <Checkbox
@@ -218,9 +218,9 @@ export default function Storefront() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {paginatedProducts.map((product: any) => {
-              const productId = product.id || product._id;
+              const productId = product._id || product.id;
               const productIdStr = productId ? productId.toString() : "";
-              
+
               return (
               <Card key={productIdStr} className="group hover:shadow-md transition-shadow">
                 <div className="relative">
@@ -296,7 +296,7 @@ export default function Storefront() {
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </Button>
-                
+
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
                   <Button
                     key={page}
@@ -307,7 +307,7 @@ export default function Storefront() {
                     {page}
                   </Button>
                 ))}
-                
+
                 <Button
                   variant="outline"
                   size="icon"

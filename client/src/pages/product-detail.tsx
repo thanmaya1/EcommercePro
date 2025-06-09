@@ -62,7 +62,7 @@ export default function ProductDetail() {
 
   // Mutations
   const addToCartMutation = useMutation({
-    mutationFn: async ({ productId, quantity }: { productId: number; quantity: number }) => {
+    mutationFn: async ({ productId, quantity }: { productId: string; quantity: number }) => {
       const res = await apiRequest("POST", "/api/cart", { productId, quantity });
       return res.json();
     },
@@ -76,7 +76,7 @@ export default function ProductDetail() {
   });
 
   const addToWishlistMutation = useMutation({
-    mutationFn: async (productId: number) => {
+    mutationFn: async (productId: string) => {
       const res = await apiRequest("POST", "/api/wishlist", { productId });
       return res.json();
     },
@@ -112,10 +112,10 @@ export default function ProductDetail() {
     return <div className="flex items-center justify-center min-h-screen">Product not found</div>;
   }
 
-  const category = categories.find((cat: any) => cat.id === product.categoryId);
+  const category = categories.find((cat: any) => (cat._id || cat.id).toString() === product.categoryId.toString());
   const averageRating = reviews.length > 0 
     ? reviews.reduce((sum: number, review: any) => sum + review.rating, 0) / reviews.length 
-    : 5;
+    : 0;
 
   const renderStars = (rating: number, size: string = "h-4 w-4") => {
     return Array.from({ length: 5 }, (_, i) => (
@@ -250,7 +250,7 @@ export default function ProductDetail() {
               </div>
               <Button
                 className="flex-1"
-                onClick={() => user && addToCartMutation.mutate({ productId: product.id, quantity })}
+                onClick={() => user && addToCartMutation.mutate({ productId: (product._id || product.id).toString(), quantity })}
                 disabled={!user || addToCartMutation.isPending}
               >
                 <ShoppingCart className="h-4 w-4 mr-2" />
@@ -259,7 +259,7 @@ export default function ProductDetail() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => user && addToWishlistMutation.mutate(product.id)}
+                onClick={() => user && addToWishlistMutation.mutate((product._id || product.id).toString())}
                 disabled={!user}
               >
                 <Heart className="h-4 w-4" />

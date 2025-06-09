@@ -357,7 +357,7 @@ export default function AdminDashboard() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        {categories.find((cat: any) => (cat.id || cat._id) === product.categoryId)?.name || "N/A"}
+                        {categories.find((cat: any) => (cat._id || cat.id).toString() === product.categoryId.toString())?.name || "N/A"}
                       </TableCell>
                       <TableCell>
                         <div className="flex items-center space-x-2">

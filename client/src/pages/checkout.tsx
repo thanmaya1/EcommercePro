@@ -71,7 +71,7 @@ export default function CheckoutPage() {
   const cartItemsWithProducts = Array.isArray(cartItems)
     ? cartItems.map((item: any) => {
         const product = Array.isArray(products)
-          ? products.find((p: any) => p.id === item.productId)
+          ? products.find((p: any) => (p._id || p.id).toString() === item.productId.toString())
           : null;
         return { ...item, product };
       }).filter((item: any) => item.product)
@@ -91,7 +91,7 @@ export default function CheckoutPage() {
   const createOrderMutation = useMutation({
     mutationFn: async (data: CheckoutFormData) => {
       const selectedAddress = Array.isArray(addresses) 
-        ? addresses.find((addr: any) => addr.id.toString() === data.shippingAddressId)
+        ? addresses.find((addr: any) => (addr._id || addr.id).toString() === data.shippingAddressId)
         : null;
       
       const orderData = {
@@ -101,7 +101,7 @@ export default function CheckoutPage() {
         discount: "0.00",
         tax: tax.toFixed(2),
         total: total.toFixed(2),
-        shippingAddress: `${selectedAddress?.address}, ${selectedAddress?.city}, ${selectedAddress?.state} ${selectedAddress?.zipCode}`,
+        shippingAddress: `${selectedAddress?.street}, ${selectedAddress?.city}, ${selectedAddress?.state} ${selectedAddress?.zipCode}`,
         couponCode: null,
       };
 
@@ -111,7 +111,7 @@ export default function CheckoutPage() {
       // Create order items
       for (const item of cartItemsWithProducts) {
         await apiRequest("POST", "/api/order-items", {
-          orderId: order.id,
+          orderId: order._id || order.id,
           productId: item.productId,
           quantity: item.quantity,
           price: item.product.salePrice || item.product.price,
@@ -228,16 +228,19 @@ export default function CheckoutPage() {
                       value={checkoutForm.watch("shippingAddressId")}
                       onValueChange={(value) => checkoutForm.setValue("shippingAddressId", value)}
                     >
-                      {Array.isArray(addresses) && addresses.map((address: any) => (
-                        <div key={address.id} className="flex items-start space-x-3 p-4 border rounded-lg">
-                          <RadioGroupItem value={address.id.toString()} className="mt-1" />
+                      {Array.isArray(addresses) && addresses.map((address: any) => {
+                        const addressId = (address._id || address.id).toString();
+                        return (
+                        <div key={addressId} className="flex items-start space-x-3 p-4 border rounded-lg">
+                          <RadioGroupItem value={addressId} className="mt-1" />
                           <div className="flex-1">
                             <p className="font-medium">{address.firstName} {address.lastName}</p>
-                            <p className="text-sm text-neutral">{address.address}</p>
+                            <p className="text-sm text-neutral">{address.street}</p>
                             <p className="text-sm text-neutral">{address.city}, {address.state} {address.zipCode}</p>
                           </div>
                         </div>
-                      ))}
+                        );
+                      })}
                     </RadioGroup>
                   )}
                   <Button type="submit" className="w-full" disabled={!checkoutForm.watch("shippingAddressId")}>

@@ -186,7 +186,7 @@ export default function WishlistPage() {
                 </div>
                 <span className="text-sm text-neutral">(124 reviews)</span>
               </div>
-              <Link href={`/product/${item.product.id}`}>
+              <Link href={`/product/${(item.product._id || item.product.id).toString()}`}>
                 <h3 className="font-medium mb-2 hover:text-primary cursor-pointer">
                   {item.product.name}
                 </h3>
