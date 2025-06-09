@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 import session from "express-session";
 import createMemoryStore from "memorystore";
@@ -446,18 +445,23 @@ export class DatabaseStorage implements IStorage {
     return await CartItem.find({ userId }).sort({ createdAt: 1 });
   }
 
-  async addToCart(cartItem: any): Promise<any> {
-    const existing = await CartItem.findOne({
-      userId: cartItem.userId,
-      productId: cartItem.productId
-    });
+  async addToCart(cartItemData: any) {
+    try {
+      const existingItem = await CartItem.findOne({
+        userId: cartItemData.userId,
+        productId: cartItemData.productId
+      });
 
-    if (existing) {
-      existing.quantity += cartItem.quantity;
-      return await existing.save();
-    } else {
-      const newCartItem = new CartItem(cartItem);
-      return await newCartItem.save();
+      if (existingItem) {
+        existingItem.quantity += cartItemData.quantity;
+        return await existingItem.save();
+      } else {
+        const cartItem = new CartItem(cartItemData);
+        return await cartItem.save();
+      }
+    } catch (error) {
+      console.error("Add to cart error:", error);
+      throw error;
     }
   }
 

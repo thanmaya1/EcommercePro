@@ -217,8 +217,12 @@ export default function Storefront() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {paginatedProducts.map((product: any) => (
-              <Card key={product.id} className="group hover:shadow-md transition-shadow">
+            {paginatedProducts.map((product: any) => {
+              const productId = product.id || product._id;
+              const productIdStr = productId ? productId.toString() : "";
+              
+              return (
+              <Card key={productIdStr} className="group hover:shadow-md transition-shadow">
                 <div className="relative">
                   <img
                     src={product.imageUrl || "https://via.placeholder.com/400x300"}
@@ -228,7 +232,7 @@ export default function Storefront() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => user && addToWishlistMutation.mutate(product.id)}
+                    onClick={() => user && addToWishlistMutation.mutate(productIdStr)}
                     disabled={!user}
                     className="absolute top-3 right-3 rounded-full bg-white dark:bg-card-dark shadow-md opacity-0 group-hover:opacity-100 transition-opacity"
                   >
@@ -247,7 +251,7 @@ export default function Storefront() {
                     </div>
                     <span className="text-sm text-neutral">(124 reviews)</span>
                   </div>
-                  <Link href={`/product/${product.id}`}>
+                  <Link href={`/product/${productIdStr}`}>
                     <h3 className="font-medium mb-2 hover:text-primary cursor-pointer">
                       {product.name}
                     </h3>
@@ -268,7 +272,7 @@ export default function Storefront() {
                     </div>
                     <Button
                       size="sm"
-                      onClick={() => user && addToCartMutation.mutate({ productId: product.id, quantity: 1 })}
+                      onClick={() => user && addToCartMutation.mutate({ productId: productIdStr, quantity: 1 })}
                       disabled={!user || addToCartMutation.isPending}
                     >
                       Add to Cart
@@ -276,7 +280,8 @@ export default function Storefront() {
                   </div>
                 </CardContent>
               </Card>
-            ))}
+              );
+            })}
           </div>
 
           {/* Pagination */}

@@ -202,14 +202,15 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const cartItemData = insertCartItemSchema.parse({
+      const cartItemData = {
         ...req.body,
         userId: req.user!.id,
-      });
+      };
       
       const cartItem = await storage.addToCart(cartItemData);
       res.status(201).json(cartItem);
     } catch (error) {
+      console.error("Cart error:", error);
       res.status(400).json({ message: "Invalid cart item data" });
     }
   });
