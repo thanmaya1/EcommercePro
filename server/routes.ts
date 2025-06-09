@@ -38,7 +38,7 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const updates = req.body;
       const category = await storage.updateCategory(id, updates);
       
@@ -58,7 +58,7 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const deleted = await storage.deleteCategory(id);
       
       if (!deleted) {
@@ -74,7 +74,7 @@ export function registerRoutes(app: Express): Server {
   // Product routes
   app.get("/api/products", async (req, res) => {
     try {
-      const categoryId = req.query.categoryId ? parseInt(req.query.categoryId as string) : undefined;
+      const categoryId = req.query.categoryId as string;
       const search = req.query.search as string;
       const products = await storage.getProducts(categoryId, search);
       res.json(products);
@@ -85,7 +85,7 @@ export function registerRoutes(app: Express): Server {
 
   app.get("/api/products/:id", async (req, res) => {
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const product = await storage.getProduct(id);
       
       if (!product) {
@@ -118,7 +118,7 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const updates = req.body;
       const product = await storage.updateProduct(id, updates);
       
@@ -138,7 +138,7 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const deleted = await storage.deleteProduct(id);
       
       if (!deleted) {
@@ -154,7 +154,7 @@ export function registerRoutes(app: Express): Server {
   // Review routes
   app.get("/api/products/:id/reviews", async (req, res) => {
     try {
-      const productId = parseInt(req.params.id);
+      const productId = req.params.id;
       const reviews = await storage.getProductReviews(productId);
       res.json(reviews);
     } catch (error) {
@@ -168,12 +168,12 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const productId = parseInt(req.params.id);
-      const reviewData = insertReviewSchema.parse({
+      const productId = req.params.id;
+      const reviewData = {
         ...req.body,
         productId,
         userId: req.user!.id,
-      });
+      };
       
       const review = await storage.createReview(reviewData);
       res.status(201).json(review);
@@ -220,7 +220,7 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const { quantity } = req.body;
       const cartItem = await storage.updateCartItem(id, quantity);
       
@@ -240,7 +240,7 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const deleted = await storage.removeFromCart(id, req.user!.id);
       
       if (!deleted) {
@@ -291,7 +291,7 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const deleted = await storage.removeFromWishlist(id, req.user!.id);
       
       if (!deleted) {
@@ -329,7 +329,7 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const order = await storage.getOrder(id);
       
       if (!order) {
@@ -337,7 +337,7 @@ export function registerRoutes(app: Express): Server {
       }
 
       // Check if user owns the order or is admin
-      if (order.userId !== req.user!.id && !req.user!.isAdmin) {
+      if (order.userId.toString() !== req.user!.id && !req.user!.isAdmin) {
         return res.status(403).json({ message: "Access denied" });
       }
       
@@ -354,7 +354,7 @@ export function registerRoutes(app: Express): Server {
     }
 
     try {
-      const id = parseInt(req.params.id);
+      const id = req.params.id;
       const { status } = req.body;
       const order = await storage.updateOrderStatus(id, status);
       
